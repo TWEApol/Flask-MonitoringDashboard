@@ -12,8 +12,11 @@ def get_latest_test_version(db_session):
     :param db_session: session for the database
     :return latest test version
     """
-    return db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
-        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()[0][0]
+    results = db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
+        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()
+    if results:
+        return results[0][0]
+    return None
 
 
 def get_previous_test_version(db_session):
@@ -22,8 +25,11 @@ def get_previous_test_version(db_session):
     :param db_session: session for the database
     :return previous test version
     """
-    return db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
-        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()[1][0]
+    results = db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
+        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()
+    if results:
+        return results[1][0]
+    return None
 
 
 def count_rows_group(db_session, column, *criterion):

@@ -6,11 +6,13 @@ from flask_monitoringdashboard.core.colors import get_color
 from flask_monitoringdashboard.core.forms import get_slider_form
 from flask_monitoringdashboard.core.info_box import get_plot_info
 from flask_monitoringdashboard.core.plot import get_layout, get_figure, boxplot
+from flask_monitoringdashboard.core.rules import get_rules
 from flask_monitoringdashboard.database import session_scope, TestEndpoint
 from flask_monitoringdashboard.database.count import count_builds_endpoint
 from flask_monitoringdashboard.database.count_group import get_value, count_times_tested, get_latest_test_version, \
     get_previous_test_version
 from flask_monitoringdashboard.database.data_grouped import get_test_data_grouped
+from flask_monitoringdashboard.database.endpoint import get_last_requested
 from flask_monitoringdashboard.database.tested_endpoints import get_tested_endpoint_names
 from flask_monitoringdashboard.database.tests import get_travis_builds, \
     get_endpoint_measurements_job, get_last_tested_times, get_endpoint_measurements
@@ -109,7 +111,8 @@ def endpoint_coverage():
         tested_times = get_last_tested_times(db_session)
 
         result = []
-        for endpoint in get_tested_endpoint_names(db_session):
+        tested_endpoints = get_tested_endpoint_names(db_session)
+        for endpoint in tested_endpoints:
             result.append({
                 'name': endpoint,
                 'color': get_color(endpoint),
@@ -120,7 +123,19 @@ def endpoint_coverage():
                 'last-tested': get_value(tested_times, endpoint, default=None)
             })
 
-        return render_template('fmd_testmonitor/coverage.html', result=result)
+        last_accessed = get_last_requested(db_session)
+        endpoints = []
+        for rule in get_rules():
+            if rule.endpoint not in tested_endpoints:
+                endpoints.append({
+                    'color': get_color(rule.endpoint),
+                    'rule': rule.rule,
+                    'endpoint': rule.endpoint,
+                    'methods': rule.methods,
+                    'last_accessed': get_value(last_accessed, rule.endpoint, default=None)
+                })
+
+        return render_template('fmd_testmonitor/coverage.html', result=result, untested_endpoints=endpoints)
 
 
 def get_boxplot_endpoints(endpoint=None, form=None):

@@ -36,10 +36,50 @@
             </div>
         </div>
     </div>
+
+
+    <div class="card mb-3">
+        <div class="card-header"><h4>Untested Endpoints</h4></div>
+        <div class="card-body">
+        {% if untested_endpoints %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0"
+                       data-page-length="10">
+                    <thead>
+                        <tr>
+                            <th>Color</th>
+                            <th>Route</th>
+                            <th>HTTP Methods</th>
+                            <th>Endpoint Name</th>
+                            <th>Time of Last Request</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in untested_endpoints %}
+                            <tr>
+                                <td style="background-color: {{ row.color }}"></td>
+                                <td style="max-width: 200px;">{{ row.rule }}</td>
+                                <td>{{ ", ".join(row.methods) }}</td>
+                                <td style="max-width: 200px;">{{ row.endpoint }}</td>
+                                <td style="text-align: center;"><date>{{ "{:%Y-%m-%d %H:%M:%S}".format(row.last_accessed) if row.last_accessed }}</date></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        {% else %}
+            Nice! Your app does not have any untested endpoints.
+        {% endif %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}
     <script type="text/javascript">
         $('#dataTable').DataTable().order([[2, "desc"]]).draw();
+    </script>
+    <script type="text/javascript">
+        $('#dataTable2').DataTable().order([[1, "asc"]]).draw();
     </script>
 {% endblock %}
