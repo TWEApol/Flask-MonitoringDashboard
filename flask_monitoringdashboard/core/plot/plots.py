@@ -32,8 +32,10 @@ def boxplot(values, **kwargs):
     """
     if 'name' in kwargs.keys():
         kwargs = add_default_value('marker', {'color': get_color(kwargs.get('name', ''))}, **kwargs)
+        kwargs.pop('name')
     if 'label' in kwargs.keys():
-        kwargs = add_default_value('name', kwargs.get('label', ''))
+        kwargs = add_default_value('name', kwargs.get('label', ''), **kwargs)
+        kwargs.pop('label')
     kwargs = add_default_value('x', value=values, **kwargs)
     return go.Box(**kwargs)
 

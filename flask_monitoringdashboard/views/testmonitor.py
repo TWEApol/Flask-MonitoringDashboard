@@ -7,32 +7,18 @@ from flask_monitoringdashboard.core.forms import get_slider_form
 from flask_monitoringdashboard.core.info_box import get_plot_info
 from flask_monitoringdashboard.core.plot import get_layout, get_figure, boxplot
 from flask_monitoringdashboard.database import session_scope, TestEndpoint
-from flask_monitoringdashboard.database.count import count_test_builds, count_builds_endpoint
+from flask_monitoringdashboard.database.count import count_builds_endpoint
 from flask_monitoringdashboard.database.count_group import get_value, count_times_tested, get_latest_test_version
 from flask_monitoringdashboard.database.data_grouped import get_test_data_grouped
 from flask_monitoringdashboard.database.tested_endpoints import get_tested_endpoint_names
-from flask_monitoringdashboard.database.tests import get_test_suites, get_travis_builds, \
-    get_endpoint_measurements_job, get_suite_measurements, get_last_tested_times, get_endpoint_measurements
+from flask_monitoringdashboard.database.tests import get_travis_builds, \
+    get_endpoint_measurements_job, get_last_tested_times, get_endpoint_measurements
 
 AXES_INFO = '''The X-axis presents the execution time in ms. The Y-axis presents the
 Travis builds of the Flask application.'''
 
 CONTENT_INFO = '''In this graph, it is easy to compare the execution time of the different builds
 to one another. This information may be useful to validate which endpoints need to be improved.'''
-
-
-@blueprint.route('/test_build_performance', methods=['GET', 'POST'])
-@secure
-def test_build_performance():
-    """
-    Shows the performance results for the complete test runs of a number of Travis builds.
-    :return:
-    """
-    with session_scope() as db_session:
-        form = get_slider_form(count_test_builds(db_session), title='Select the number of builds')
-    graph = get_boxplot_tests(form=form)
-    return render_template('fmd_dashboard/graph.html', graph=graph, title='Per-Build Test Performance',
-                           information=get_plot_info(AXES_INFO, CONTENT_INFO), form=form)
 
 
 @blueprint.route('/endpoint_build_performance', methods=['GET', 'POST'])
@@ -97,33 +83,6 @@ def testmonitor():
         return render_template('fmd_testmonitor/testmonitor.html', result=result)
 
 
-def get_boxplot_tests(form=None):
-    """
-    Generates a box plot visualization for the unit test performance results.
-    :param form: the form that can be used for showing a subset of the data
-    :return:
-    """
-    trace = []
-    with session_scope() as db_session:
-        if form:
-            suites = get_test_suites(db_session, limit=form.get_slider_value())
-        else:
-            suites = get_test_suites(db_session)
-
-        if not suites:
-            return None
-        for s in suites:
-            values = get_suite_measurements(db_session, suite=s)
-            trace.append(boxplot(values=values, label='{} -'.format(s)))
-
-        layout = get_layout(
-            xaxis={'title': 'Execution time (ms)'},
-            yaxis={'title': 'Travis Build', 'autorange': 'reversed'}
-        )
-
-        return get_figure(layout=layout, data=trace)
-
-
 def get_boxplot_endpoints(endpoint=None, form=None):
     """
     Generates a box plot visualization for the unit test endpoint hits performance results.
@@ -143,10 +102,10 @@ def get_boxplot_endpoints(endpoint=None, form=None):
         for id in ids:
             if endpoint:
                 values = get_endpoint_measurements_job(db_session, name=endpoint, job_id=id)
+                trace.append(boxplot(values=values, label='{} -'.format(id), name=endpoint))
             else:
                 values = get_endpoint_measurements(db_session, suite=id)
-
-            trace.append(boxplot(values=values, label='{} -'.format(id)))
+                trace.append(boxplot(values=values, label='{} -'.format(id), marker={'color': 'rgb(105, 105, 105)'}))
 
         layout = get_layout(
             xaxis={'title': 'Execution time (ms)'},
