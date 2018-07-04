@@ -12,8 +12,8 @@ class TestTestMonitor(unittest.TestCase):
         add_fake_data()
         self.app = get_test_app()
 
-    def test_build_performance(self):
-        test_admin_secure(self, 'test_build_performance')
+    def test_endpoint_coverage(self):
+        test_admin_secure(self, 'endpoint_coverage')
 
     def test_endpoint_build_performance(self):
         test_admin_secure(self, 'endpoint_build_performance')

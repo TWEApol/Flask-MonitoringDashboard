@@ -2,7 +2,7 @@
 {% set title="Testmonitor" %}
 {% block content %}
     <div class="card mb-3">
-        <div class="card-header"><h4>Median Request Duration</h4></div>
+        <div class="card-header"><h4>Number of Times Tested</h4></div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
@@ -24,10 +24,10 @@
                             onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
                             <td style="background-color: {{ record.color }}"></td>
                             <td style="max-width: 200px;">{{ record.name }}</td>
-                            <td style="text-align: right;"><time>{{ record['latest'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['previous'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['week'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['four-weeks'] }}</time></td>
+                            <td style="text-align: right;">{{ "{:,d}".format(record['latest']) }}</td>
+                            <td style="text-align: right;">{{ "{:,d}".format(record['previous']) }}</td>
+                            <td style="text-align: right;">{{ record['week'] }}</td>
+                            <td style="text-align: right;">{{ record['four-weeks'] }}</td>
                             <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>
                         </tr>
                     {% endfor %}

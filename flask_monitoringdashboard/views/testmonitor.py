@@ -8,7 +8,8 @@ from flask_monitoringdashboard.core.info_box import get_plot_info
 from flask_monitoringdashboard.core.plot import get_layout, get_figure, boxplot
 from flask_monitoringdashboard.database import session_scope, TestEndpoint
 from flask_monitoringdashboard.database.count import count_builds_endpoint
-from flask_monitoringdashboard.database.count_group import get_value, count_times_tested, get_latest_test_version
+from flask_monitoringdashboard.database.count_group import get_value, count_times_tested, get_latest_test_version, \
+    get_previous_test_version
 from flask_monitoringdashboard.database.data_grouped import get_test_data_grouped
 from flask_monitoringdashboard.database.tested_endpoints import get_tested_endpoint_names
 from flask_monitoringdashboard.database.tests import get_travis_builds, \
@@ -58,14 +59,19 @@ def testmonitor():
     :return:
     """
     from numpy import median
+    import datetime
+    week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+    four_weeks_ago = datetime.datetime.utcnow() - datetime.timedelta(days=28)
 
     with session_scope() as db_session:
-        tests_latest = count_times_tested(db_session,
-                                          TestEndpoint.app_version == get_latest_test_version(db_session))
-        tests = count_times_tested(db_session)
         median_latest = get_test_data_grouped(db_session, median,
                                               TestEndpoint.app_version == get_latest_test_version(db_session))
-        median = get_test_data_grouped(db_session, median)
+        median_previous = get_test_data_grouped(db_session, median,
+                                                TestEndpoint.app_version == get_previous_test_version(db_session))
+        median_week = get_test_data_grouped(db_session, median,
+                                            TestEndpoint.time_added > week_ago)
+        median_four_weeks = get_test_data_grouped(db_session, median,
+                                                  TestEndpoint.time_added > four_weeks_ago)
         tested_times = get_last_tested_times(db_session)
 
         result = []
@@ -73,14 +79,48 @@ def testmonitor():
             result.append({
                 'name': endpoint,
                 'color': get_color(endpoint),
-                'tests-latest-version': get_value(tests_latest, endpoint),
-                'tests-overall': get_value(tests, endpoint),
-                'median-latest-version': get_value(median_latest, endpoint),
-                'median-overall': get_value(median, endpoint),
+                'latest': get_value(median_latest, endpoint),
+                'previous': get_value(median_previous, endpoint),
+                'week': get_value(median_week, endpoint),
+                'four-weeks': get_value(median_four_weeks, endpoint),
                 'last-tested': get_value(tested_times, endpoint, default=None)
             })
 
         return render_template('fmd_testmonitor/testmonitor.html', result=result)
+
+
+@blueprint.route('/endpoint_coverage')
+@secure
+def endpoint_coverage():
+    """
+    Gives an overview of the coverage of the endpoints within the tested app.
+    :return:
+    """
+    import datetime
+    week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+    four_weeks_ago = datetime.datetime.utcnow() - datetime.timedelta(days=28)
+
+    with session_scope() as db_session:
+        tests_latest = count_times_tested(db_session, TestEndpoint.app_version == get_latest_test_version(db_session))
+        tests_previous = count_times_tested(db_session,
+                                            TestEndpoint.app_version == get_previous_test_version(db_session))
+        tests_week = count_times_tested(db_session, TestEndpoint.time_added > week_ago)
+        tests_four_weeks = count_times_tested(db_session, TestEndpoint.time_added > four_weeks_ago)
+        tested_times = get_last_tested_times(db_session)
+
+        result = []
+        for endpoint in get_tested_endpoint_names(db_session):
+            result.append({
+                'name': endpoint,
+                'color': get_color(endpoint),
+                'latest': get_value(tests_latest, endpoint),
+                'previous': get_value(tests_previous, endpoint),
+                'week': get_value(tests_week, endpoint),
+                'four-weeks': get_value(tests_four_weeks, endpoint),
+                'last-tested': get_value(tested_times, endpoint, default=None)
+            })
+
+        return render_template('fmd_testmonitor/coverage.html', result=result)
 
 
 def get_boxplot_endpoints(endpoint=None, form=None):

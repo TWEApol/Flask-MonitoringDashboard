@@ -12,10 +12,18 @@ def get_latest_test_version(db_session):
     :param db_session: session for the database
     :return latest test version
     """
-    latest_time = db_session.query(func.max(TestEndpoint.time_added)).one()[0]
-    if latest_time:
-        return db_session.query(TestEndpoint.app_version).filter(TestEndpoint.time_added == latest_time).one()[0]
-    return None
+    return db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
+        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()[0][0]
+
+
+def get_previous_test_version(db_session):
+    """
+    Retrieves the previous version of the user app that was tested.
+    :param db_session: session for the database
+    :return previous test version
+    """
+    return db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
+        TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()[1][0]
 
 
 def count_rows_group(db_session, column, *criterion):
