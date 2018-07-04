@@ -34,7 +34,7 @@ def endpoint_build_performance():
     with session_scope() as db_session:
         form = get_slider_form(count_builds_endpoint(db_session), title='Select the number of builds')
     graph = get_boxplot_endpoints(form=form)
-    return render_template('fmd_dashboard/graph.html', graph=graph, title='Per-Build Endpoint Performance',
+    return render_template('fmd_testmonitor/graph.html', graph=graph, title='Per-Build Endpoint Performance',
                            information=get_plot_info(AXES_INFO, CONTENT_INFO), form=form)
 
 

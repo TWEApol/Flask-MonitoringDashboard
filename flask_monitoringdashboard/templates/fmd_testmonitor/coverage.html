@@ -1,78 +1,94 @@
 {% extends "fmd_base.html" %}
 {% set title="Testmonitor" %}
 {% block content %}
-    <div class="card mb-3">
-        <div class="card-header"><h4>Number of Times Tested</h4></div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
-                       data-page-length="10">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Endpoint</th>
-                        <th>Latest version</th>
-                        <th>Previous version</th>
-                        <th>Past week</th>
-                        <th>Past four weeks</th>
-                        <th>Last tested</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for record in result %}
-                        <tr style="cursor: pointer"
-                            onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
-                            <td style="background-color: {{ record.color }}"></td>
-                            <td style="max-width: 200px;">{{ record.name }}</td>
-                            <td style="text-align: right;">{{ "{:,d}".format(record['latest']) }}</td>
-                            <td style="text-align: right;">{{ "{:,d}".format(record['previous']) }}</td>
-                            <td style="text-align: right;">{{ record['week'] }}</td>
-                            <td style="text-align: right;">{{ record['four-weeks'] }}</td>
-                            <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-
-    <div class="card mb-3">
-        <div class="card-header"><h4>Untested Endpoints</h4></div>
-        <div class="card-body">
-        {% if untested_endpoints %}
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0"
-                       data-page-length="10">
-                    <thead>
+    {% if result %}
+        <div class="card mb-3">
+            <div class="card-header"><h4>Number of Times Tested</h4></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
+                           data-page-length="10">
+                        <thead>
                         <tr>
-                            <th>Color</th>
-                            <th>Route</th>
-                            <th>HTTP Methods</th>
-                            <th>Endpoint Name</th>
-                            <th>Time of Last Request</th>
+                            <th></th>
+                            <th>Endpoint</th>
+                            <th>Latest version</th>
+                            <th>Previous version</th>
+                            <th>Past week</th>
+                            <th>Past four weeks</th>
+                            <th>Last tested</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for row in untested_endpoints %}
-                            <tr>
-                                <td style="background-color: {{ row.color }}"></td>
-                                <td style="max-width: 200px;">{{ row.rule }}</td>
-                                <td>{{ ", ".join(row.methods) }}</td>
-                                <td style="max-width: 200px;">{{ row.endpoint }}</td>
-                                <td style="text-align: center;"><date>{{ "{:%Y-%m-%d %H:%M:%S}".format(row.last_accessed) if row.last_accessed }}</date></td>
+                        {% for record in result %}
+                            <tr style="cursor: pointer"
+                                onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
+                                <td style="background-color: {{ record.color }}"></td>
+                                <td style="max-width: 200px;">{{ record.name }}</td>
+                                <td style="text-align: right;">{{ "{:,d}".format(record['latest']) }}</td>
+                                <td style="text-align: right;">{{ "{:,d}".format(record['previous']) }}</td>
+                                <td style="text-align: right;">{{ record['week'] }}</td>
+                                <td style="text-align: right;">{{ record['four-weeks'] }}</td>
+                                <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
-                </form>
+                </div>
             </div>
-        {% else %}
-            Nice! Your app does not have any untested endpoints.
-        {% endif %}
+
         </div>
-    </div>
+
+
+        <div class="card mb-3">
+            <div class="card-header"><h4>Untested Endpoints</h4></div>
+            <div class="card-body">
+                {% if untested_endpoints %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0"
+                               data-page-length="10">
+                            <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Route</th>
+                                <th>HTTP Methods</th>
+                                <th>Endpoint Name</th>
+                                <th>Time of Last Request</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for row in untested_endpoints %}
+                                <tr>
+                                    <td style="background-color: {{ row.color }}"></td>
+                                    <td style="max-width: 200px;">{{ row.rule }}</td>
+                                    <td>{{ ", ".join(row.methods) }}</td>
+                                    <td style="max-width: 200px;">{{ row.endpoint }}</td>
+                                    <td style="text-align: center;">
+                                        <date>{{ "{:%Y-%m-%d %H:%M:%S}".format(row.last_accessed) if row.last_accessed }}</date>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        </form>
+                    </div>
+                {% else %}
+                    Nice! Your app does not have any untested endpoints.
+                {% endif %}
+            </div>
+        </div>
+
+    {% else %}
+        <div class="card mb-3">
+            <div class="card-header"><h4>No results found..</h4></div>
+            <div class="card-body">
+                There are no results to show yet. Please submit some by triggering an automatic Travis build for
+                your app.
+            </div>
+        </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block script %}

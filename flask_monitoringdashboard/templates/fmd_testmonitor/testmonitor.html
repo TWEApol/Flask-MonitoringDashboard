@@ -1,41 +1,60 @@
 {% extends "fmd_base.html" %}
 {% set title="Testmonitor" %}
 {% block content %}
+
     <div class="card mb-3">
-        <div class="card-header"><h4>Median Request Duration</h4></div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
-                       data-page-length="10">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Endpoint</th>
-                        <th>Latest version</th>
-                        <th>Previous version</th>
-                        <th>Past week</th>
-                        <th>Past four weeks</th>
-                        <th>Last tested</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for record in result %}
-                        <tr style="cursor: pointer"
-                            onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
-                            <td style="background-color: {{ record.color }}"></td>
-                            <td style="max-width: 200px;">{{ record.name }}</td>
-                            <td style="text-align: right;"><time>{{ record['latest'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['previous'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['week'] }}</time></td>
-                            <td style="text-align: right;"><time>{{ record['four-weeks'] }}</time></td>
-                            <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>
+        {% if result %}
+            <div class="card-header"><h4>Median Request Duration</h4></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
+                           data-page-length="10">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Endpoint</th>
+                            <th>Latest version</th>
+                            <th>Previous version</th>
+                            <th>Past week</th>
+                            <th>Past four weeks</th>
+                            <th>Last tested</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for record in result %}
+                            <tr style="cursor: pointer"
+                                onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
+                                <td style="background-color: {{ record.color }}"></td>
+                                <td style="max-width: 200px;">{{ record.name }}</td>
+                                <td style="text-align: right;">
+                                    <time>{{ record['latest'] }}</time>
+                                </td>
+                                <td style="text-align: right;">
+                                    <time>{{ record['previous'] }}</time>
+                                </td>
+                                <td style="text-align: right;">
+                                    <time>{{ record['week'] }}</time>
+                                </td>
+                                <td style="text-align: right;">
+                                    <time>{{ record['four-weeks'] }}</time>
+                                </td>
+                                <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="card-header"><h4>No results found..</h4></div>
+            <div class="card-body">
+                There are no results to show yet. Please submit some by triggering an automatic Travis build for your
+                app.
+            </div>
+            </div>
+        {% endif %}
     </div>
+
 {% endblock %}
 
 {% block script %}

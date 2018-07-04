@@ -8,7 +8,9 @@ function format_time(time){
     var hr = Math.floor(s / 3600);
     var day = Math.floor(hr / 24);
     var value = "";
-    if (ms < 100.5) {
+    if (ms == 0) {
+        value = "N/A"
+    } else if (ms < 100.5) {
         value = ms + " ms";
     } else if (ms < 999.5) {
         value = Math.round(ms) + " ms";

@@ -27,7 +27,7 @@ def get_previous_test_version(db_session):
     """
     results = db_session.query(TestEndpoint.app_version, func.max(TestEndpoint.time_added)).group_by(
         TestEndpoint.app_version).order_by(func.max(TestEndpoint.time_added).desc()).all()
-    if results:
+    if len(results) > 1:
         return results[1][0]
     return None
 
