@@ -28,6 +28,11 @@
                                 <td style="max-width: 200px;">{{ record.name }}</td>
                                 <td style="text-align: right;">
                                     <time>{{ record['latest'] }}</time>
+                                    {% if record.progress %}
+                                        <arr class="down green"></arr>
+                                    {% else %}
+                                        <arr class="up red"></arr>
+                                    {% endif %}
                                 </td>
                                 <td style="text-align: right;">
                                     <time>{{ record['previous'] }}</time>

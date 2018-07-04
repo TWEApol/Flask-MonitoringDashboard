@@ -26,8 +26,15 @@
                                 onclick="window.location='{{ url_for('dashboard.endpoint_test_details', end=record.name) }}';">
                                 <td style="background-color: {{ record.color }}"></td>
                                 <td style="max-width: 200px;">{{ record.name }}</td>
-                                <td style="text-align: right;">{{ "{:,d}".format(record['latest']) }}</td>
-                                <td style="text-align: right;">{{ "{:,d}".format(record['previous']) }}</td>
+                                <td style="text-align: right;">
+                                    {{ record['latest'] }}
+                                    {% if record.progress %}
+                                        <arr class="up green"></arr>
+                                    {% else %}
+                                        <arr class="down red"></arr>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">{{ record['previous'] }}</td>
                                 <td style="text-align: right;">{{ record['week'] }}</td>
                                 <td style="text-align: right;">{{ record['four-weeks'] }}</td>
                                 <td style="text-align: center;">{{ "{:%Y-%m-%d %H:%M:%S }".format(record['last-tested']) }}</td>

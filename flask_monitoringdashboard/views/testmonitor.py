@@ -85,7 +85,9 @@ def testmonitor():
                 'previous': get_value(median_previous, endpoint),
                 'week': get_value(median_week, endpoint),
                 'four-weeks': get_value(median_four_weeks, endpoint),
-                'last-tested': get_value(tested_times, endpoint, default=None)
+                'last-tested': get_value(tested_times, endpoint, default=None),
+                'progress': (True if get_value(median_latest, endpoint) <= get_value(median_previous, endpoint)
+                             else False)
             })
 
         return render_template('fmd_testmonitor/testmonitor.html', result=result)
@@ -120,7 +122,9 @@ def endpoint_coverage():
                 'previous': get_value(tests_previous, endpoint),
                 'week': get_value(tests_week, endpoint),
                 'four-weeks': get_value(tests_four_weeks, endpoint),
-                'last-tested': get_value(tested_times, endpoint, default=None)
+                'last-tested': get_value(tested_times, endpoint, default=None),
+                'progress': (True if get_value(tests_latest, endpoint) >= get_value(tests_previous, endpoint)
+                             else False)
             })
 
         last_accessed = get_last_requested(db_session)
