@@ -87,13 +87,13 @@ def bind(app):
                 hits2_log.write('"{}","{}"\n'.format(hit_time_stamp, request.endpoint))
 
             return response
+    else:
+        # Add all route-functions to the blueprint
+        import flask_monitoringdashboard.views
 
-    # Add all route-functions to the blueprint
-    import flask_monitoringdashboard.views
-
-    # Add wrappers to the endpoints that have to be monitored
-    from flask_monitoringdashboard.core.measurement import init_measurement
-    blueprint.before_app_first_request(init_measurement)
+        # Add wrappers to the endpoints that have to be monitored
+        from flask_monitoringdashboard.core.measurement import init_measurement
+        blueprint.before_app_first_request(init_measurement)
 
     # register the blueprint to the app
     app.register_blueprint(blueprint, url_prefix='/' + config.link)
